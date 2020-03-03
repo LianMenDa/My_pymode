@@ -29,7 +29,7 @@ def make_file(filename):
 
 
 # 计算运行时间
-def runtime(starttime, endtime):
+def get_runtime(starttime, endtime):
     i = int(endtime - starttime)
     time = datetime.timedelta(seconds=i)
     print('程序总运行时间为:', time)
