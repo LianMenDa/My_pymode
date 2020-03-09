@@ -1,4 +1,4 @@
-import os, datetime, urllib.request
+import os, datetime, urllib.request, time, requests
 
 
 # 创建文件夹
@@ -44,3 +44,43 @@ def get_urldata(url, code='utf-8'):
     urllib.request.install_opener(opener)
     data = urllib.request.urlopen(url).read().decode(code)
     return data
+
+
+# 获取文件大小
+def get_bytes(number):
+    symbols = ('KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')
+    prefix = dict()
+    for i, s in enumerate(symbols):
+        prefix[s] = 1 << (i + 1) * 10
+    for s in reversed(symbols):
+        if int(number) >= prefix[s]:
+            value = float(number) / prefix[s]
+            return '%.2f%s' % (value, s)
+    return "%sB" % number
+
+
+# 下载文件显示速度，大小
+def downloadFile(name, url):
+    r = requests.get(url, stream=True)
+    length = float(r.headers['content-length'])
+    size = get_bytes(length)
+    print('此文件大小为' + size)
+    f = open(name, 'wb')
+    count = 0
+    count_tmp = 0
+    time1 = time.time()
+    for chunk in r.iter_content(chunk_size=512):
+        if chunk:
+            f.write(chunk)
+            count += len(chunk)
+            if time.time() - time1 > 2:
+                p = count / length * 100
+                speed = (count - count_tmp) / 1024 / 1024 / 2
+                count_tmp = count
+                print(name + ': ' + formatFloat(p) + '%' + ' Speed: ' + formatFloat(speed) + 'M/S')
+                time1 = time.time()
+    f.close()
+
+
+def formatFloat(num):
+    return '{:.2f}'.format(num)
