@@ -1,4 +1,6 @@
 import os, datetime, urllib.request, time, requests, random
+from tqdm import tqdm
+from urllib.request import urlopen
 
 
 # 创建文件夹
@@ -60,7 +62,7 @@ def get_bytes(number):
 
 
 # 下载文件显示速度，大小
-def downloadFile(name, url):
+def download_file1(name, url):
     r = requests.get(url, stream=True)
     length = float(r.headers['content-length'])
     size = get_bytes(length)
@@ -195,3 +197,27 @@ def auto_head():
     header = headersinfo.split('\n')
     length = len(header)
     return {"User-Agent": header[random.randint(0, length - 1)]}
+
+
+# 下载显示进度（整洁一点）
+def download_file2(name, url):
+    file_size = int(urlopen(url).info().get('Content-Length', -1))
+
+    if os.path.exists(name):
+        first_byte = os.path.getsize(name)
+    else:
+        first_byte = 0
+    if first_byte >= file_size:
+        return file_size
+    header = {"Range": "bytes=%s-%s" % (first_byte, file_size)}
+    pbar = tqdm(
+        total=file_size, initial=first_byte,
+        unit='B', unit_scale=True, desc=url.split('/')[-1])
+    req = requests.get(url, headers=header, stream=True)
+    with(open(name, 'ab')) as f:
+        for chunk in req.iter_content(chunk_size=1024):
+            if chunk:
+                f.write(chunk)
+                pbar.update(1024)
+    pbar.close()
+    return file_size
