@@ -212,7 +212,7 @@ def download_file2(name, url):
     header = {"Range": "bytes=%s-%s" % (first_byte, file_size)}
     pbar = tqdm(
         total=file_size, initial=first_byte,
-        unit='B', unit_scale=True, desc=url.split('/')[-1])
+        unit='B', unit_scale=True, desc=name)
     req = requests.get(url, headers=header, stream=True)
     with(open(name, 'ab')) as f:
         for chunk in req.iter_content(chunk_size=1024):
