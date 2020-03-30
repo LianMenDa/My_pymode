@@ -1,6 +1,7 @@
 import os, datetime, urllib.request, time, requests, random
 from tqdm import tqdm
 from urllib.request import urlopen
+from googletrans import Translator
 
 
 # 创建文件夹
@@ -221,3 +222,18 @@ def download_file2(name, url):
                 pbar.update(1024)
     pbar.close()
     return file_size
+
+
+# 翻译-若是英文翻译成中文，若是中文翻译成英文，其他语言通通翻译成中文
+def auto_translator(str):
+    translator = Translator()
+    rst = translator.detect(str).lang
+    if rst == 'en':
+        rst = translator.translate(str, dest='zh-CN').text
+        return rst
+    elif rst == 'zh-CN':
+        rst = translator.translate(str, dest='en').text
+        return rst
+    else:
+        rst = translator.translate(str, dest='zh-CN').text
+        return rst
